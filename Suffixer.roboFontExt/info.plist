@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>addToMenu</key>
+	<array/>
+	<key>developer</key>
+	<string>Nina Stoessinger</string>
+	<key>developerURL</key>
+	<string>http://www.typologic.nl</string>
+	<key>html</key>
+	<false/>
+	<key>launchAtStartUp</key>
+	<integer>1</integer>
+	<key>mainScript</key>
+	<string>suffixer.py</string>
+	<key>name</key>
+	<string>Suffixer</string>
+	<key>timeStamp</key>
+	<real>1418640217.12676</real>
+	<key>version</key>
+	<string>1.0</string>
+</dict>
+</plist>
