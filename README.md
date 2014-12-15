@@ -9,6 +9,8 @@ Suffixer comes with a list of suffix presets <sup>case, dnom, fina, hist, init, 
 
 Suffixer does not live in the Extensions menu (which quickly becomes cluttered) but can be activated via the main *Font* menu of RoboFont under the heading *Change Suffixes...*, or with the shortcut Cmd+Alt+Shift+S.
 
+![Suffixer menu](/menu.png)
+
 **Some things about renaming glyphs, and a word of caution:**
 
 If you rename a glyph from RoboFont’s main interface, you are asked to confirm that the glyph should also be renamed in groups, in kerning, and with regard to components. Suffixer has all these options *on* by default, which means it should not break things like composites or kerning. It also globally assigns auto unicodes in the end (which is relevant if you are using it to add or remove suffixes). If you think any of these options should be deselectable, please let me know.
