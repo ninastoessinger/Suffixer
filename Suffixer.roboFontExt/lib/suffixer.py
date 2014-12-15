@@ -71,7 +71,7 @@ class Suffixer:
         self.w.dotTwo = TextBox((x2, y1, 15, h), ".")
         self.w.newSuffix = ComboBox((x2+p, y1, -p, h), currentPresets)
         
-        self.w.replace = CheckBox((p, y2, w1, h), "Replace existing suffix:", callback=self.replaceCheckCallback)
+        self.w.replace = CheckBox((p+2, y2, w1, h), "Replace existing suffix:", callback=self.replaceCheckCallback)
         
         self.w.dotOne = TextBox((x2, y2, 15, h), ".")
         self.w.oldSuffix = PopUpButton((x2+p, y2, -p, h), existingSuffixes)
