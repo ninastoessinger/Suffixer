@@ -20,5 +20,9 @@
 	<real>1418640217.12676</real>
 	<key>version</key>
 	<string>1.0</string>
+	<key>repository</key>
+	<string>ninastoessinger/Suffixer</string>
+	<key>extensionPath</key>
+	<string>Suffixer.roboFontExt</string>
 </dict>
 </plist>
