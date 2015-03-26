@@ -19,3 +19,4 @@ If Suffixer encounters that your current font already has a glyph with a name to
 
 Note the usage of the word “should” in the above two paragraphs; this is the very first version, so please use with caution (= make a backup copy of your font first), and report things that break.
 
+**PS. Caution when removing suffixes, re. composites:** One scenario that has proven to be problematic is when you use Suffixer to make a previously-suffixed set of glyphs the new default – for instance, make *A.new B.new C.new* into *A, B,* and *C*, replacing your previous standard *A, B,* and *C* glyphs. As it is now, Suffixer will keep and rename the old *A, B,* and *C* glyphs; but any composite glyphs that have those in them will keep referencing these old glyphs instead of (what you probably wanted) the new ones. – For such situations, the next version will have component referencing options.
