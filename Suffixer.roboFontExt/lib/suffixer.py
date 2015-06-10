@@ -1,6 +1,8 @@
 """
 RoboFont extension to change/append/replace glyph name suffixes
-Nina Stoessinger Dec. 2014
+
+v1.1 / Nina Stoessinger / 10 June 2015
+With thanks to Frederik Berlaen, David Jonathan Ross
 """
 
 from AppKit import NSApp, NSMenuItem, NSAlternateKeyMask, NSCommandKeyMask
@@ -13,6 +15,7 @@ from vanilla import *
 class Suffixer:
     
     def __init__(self):
+    	""" Add the "Change Suffixes" menu item to the Font menu. """
         title = "Change Suffixes..."
         fontMenu = NSApp().mainMenu().itemWithTitle_("Font")
         if not fontMenu:
@@ -31,6 +34,7 @@ class Suffixer:
         
         
     def openWindow(self, sender=None):
+    	""" Initialize the input window. """
         presets = [
             "case", "dnom", "fina", "hist", "init", "isol", "locl", "lnum", "medi", "numr", "onum", "ordn", "tnum",
             "pcap", "salt", "sinf", "smcp", "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08",
@@ -92,6 +96,7 @@ class Suffixer:
         
         
     def replaceCheckCallback(self, sender):
+    	""" Toggle UI options depending on selection whether to replace or append the new suffix. """
         if self.w.replace.get() == False:
             self.w.scope.set(0)
             self.w.scope.enable(0)
@@ -100,6 +105,7 @@ class Suffixer:
         
     
     def _findSuffix(self, gname):
+    	""" Find the suffix (if any) in a given glyph name. """
         i = gname.find(".")
         if i != -1 and i != 0:
             return gname[i+1:]
@@ -108,38 +114,41 @@ class Suffixer:
         
         
     def replaceSuffixes(self, sender):
+    	""" Handle replacing/appending of suffixes. """
         mode = "replace" if self.w.replace.get() == 1 else "append"
         oldSuffix = self.w.oldSuffix.getItems()[self.w.oldSuffix.get()]
         enteredSuffix = self.w.newSuffix.get()
         suffixes_in = [oldSuffix, enteredSuffix]
         
-        suffixes = []
+        suffixes = [] # build proper suffixes list
         for s in suffixes_in:
-            if "." not in s:
-                if s != "":
-                    s = "." + s
+            if s is not None and len(s) > 0:
+                if s[0] == ".":
+                    s = s[1:] # handle suffixes without periods
             suffixes.append(s)
 
         if mode == "replace" and suffixes[0] == suffixes[1]:
-        	Message(u"Cannot replace a suffix with itself.\nI mean I could, but there seems to be little point :)")
+            Message(u"Cannot replace a suffix with itself.\nI mean I could, but there seems to be little point :)")
         elif mode == "append" and suffixes[1] == "":
-        	Message(u"Cannot append an empty suffix.\n(Or you could just pretend I've already done it.)")
+            Message(u"Cannot append an empty suffix.\n(Or you could just pretend I've already done it.)")
 
         else:
 	        scope = self.f.keys() if self.w.scope.get() == 1 else self.f.selection
-	        
+
 	        if mode == "replace":
 	            for gname in scope:
 	                if gname.endswith(suffixes[0]):
-	                    oldName = gname
-	                    i = gname.find(suffixes[0])
-	                    newName = gname[:i] + suffixes[1]
-	                    self._changeGlyphname(gname, newName)
+	                    sufLen = len(suffixes[0])
+	                    if len(suffixes[1]) > 0:
+	                        newName = gname[:-sufLen] + suffixes[1]
+	                    else:
+	                        sufLenWithPeriod = sufLen+1
+	                        newName = gname[:-sufLenWithPeriod]
+                        self._changeGlyphname(gname, newName)
 	                        
 	        elif mode == "append":
 	            for gname in scope:
-	                oldName = gname
-	                newName = gname + suffixes[1]
+	                newName = gname + "." + suffixes[1]
 	                self._changeGlyphname(gname, newName)
 	                
 	        self.f.autoUnicodes()
@@ -158,6 +167,7 @@ class Suffixer:
         
         
     def _changeGlyphname(self, gname, newName):
+    	""" Assign a new glyphname to a glyph. """
         print "Suffixer: Changing name of %s to %s" % (gname, newName)
         self.f[gname].prepareUndo("Change Suffix")
         
@@ -168,9 +178,14 @@ class Suffixer:
                 i = i+1
             cp = newName + ".copy_"+str(i)
             self.f.renameGlyph(newName, cp, renameComponents=True, renameGroups=True, renameKerning=True)
+            self.f[cp].unicode = None
             print "Suffixer: A glyph named %s was already present in the font. It has been renamed to %s." % (newName, cp)
+            ### Note for future development:
+            ### At this point there is also the question which glyph existing composites should refer to
+            ### Think about how to address this
         # actual renaming of targeted glyph
         self.f.renameGlyph(gname, newName, renameComponents=True, renameGroups=True, renameKerning=True)
+        self.f[newName].autoUnicodes()
         self.f[newName].performUndo()
             
         
