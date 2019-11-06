@@ -6,7 +6,7 @@ With thanks to Frederik Berlaen, David Jonathan Ross
 """
 
 from AppKit import NSApp, NSMenuItem, NSAlternateKeyMask, NSCommandKeyMask
-from lib.baseObjects import CallbackWrapper
+from mojo.tools import CallbackWrapper
 from mojo.extensions import registerExtensionDefaults, getExtensionDefault, setExtensionDefault
 import mojo.UI
 from vanilla import *
