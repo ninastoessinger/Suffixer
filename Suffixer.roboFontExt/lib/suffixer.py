@@ -1,14 +1,14 @@
 """
 RoboFont extension to change/append/replace glyph name suffixes
 
-v1.1 / Nina Stoessinger / 10 June 2015
-With thanks to Frederik Berlaen, David Jonathan Ross
+v1.2 / Nina Stoessinger / February 2020
+With thanks to Frederik Berlaen, David Jonathan Ross, Ryan Bugden
 """
 
 from AppKit import NSApp, NSMenuItem, NSAlternateKeyMask, NSCommandKeyMask
 from mojo.tools import CallbackWrapper
 from mojo.extensions import registerExtensionDefaults, getExtensionDefault, setExtensionDefault
-import mojo.UI
+from mojo.UI import Message
 from vanilla import *
 
 
@@ -128,12 +128,12 @@ class Suffixer:
 			suffixes.append(s)
 
 		if mode == "replace" and suffixes[0] == suffixes[1]:
-			mojo.UI.Message(u"Cannot replace a suffix with itself.\nI mean I could, but there seems to be little point :)")
+			Message(u"Cannot replace a suffix with itself.\nI mean I could, but there seems to be little point :)")
 		elif mode == "append" and suffixes[1] == "":
-			mojo.UI.Message(u"Cannot append an empty suffix.\n(Or you could just pretend I've already done it.)")
+			Message(u"Cannot append an empty suffix.\n(Or you could just pretend I've already done it.)")
 
 		else:
-			scope = self.f.keys() if self.w.scope.get() == 1 else self.f.selection
+			scope = self.f.keys() if self.w.scope.get() == 1 else self.f.selectedGlyphNames
 
 			if mode == "replace":
 				for gname in scope:
@@ -151,8 +151,7 @@ class Suffixer:
 					newName = gname + "." + suffixes[1]
 					self._changeGlyphname(gname, newName)
 					
-			self.f.autoUnicodes()
-			self.f.update()
+			self.f.changed()
 			
 			# store new values as defaults
 			savedPresets = getExtensionDefault("nl.typologic.suffixer.presetSuffixes")
@@ -172,9 +171,9 @@ class Suffixer:
 		self.f[gname].prepareUndo("Change Suffix")
 		
 		# check if new name is already in use
-		if self.f.has_key(newName):
+		if newName in self.f.keys():
 			i = 1
-			while self.f.has_key(newName + ".copy_" + str(i)):
+			while (newName + ".copy_" + str(i)) in self.f.keys():
 				i = i+1
 			cp = newName + ".copy_"+str(i)
 			self.f.renameGlyph(newName, cp, renameComponents=True, renameGroups=True, renameKerning=True)
