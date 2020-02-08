@@ -7,7 +7,7 @@
 	<key>developer</key>
 	<string>Nina Stoessinger</string>
 	<key>developerURL</key>
-	<string>http://www.typologic.nl</string>
+	<string>http://www.ninastoessinger.com</string>
 	<key>html</key>
 	<false/>
 	<key>launchAtStartUp</key>
@@ -17,9 +17,9 @@
 	<key>name</key>
 	<string>Suffixer</string>
 	<key>timeStamp</key>
-	<real>1433923153</real>
+	<real>1581185017</real>
 	<key>version</key>
-	<string>1.1</string>
+	<string>1.2</string>
 	<key>repository</key>
 	<string>ninastoessinger/Suffixer</string>
 	<key>extensionPath</key>
