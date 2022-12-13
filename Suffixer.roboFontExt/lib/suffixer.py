@@ -5,7 +5,10 @@ v1.2 / Nina Stoessinger / February 2020
 With thanks to Frederik Berlaen, David Jonathan Ross, Ryan Bugden
 """
 
+import os
 from AppKit import NSApp, NSMenuItem, NSAlternateKeyMask, NSCommandKeyMask
+from fontTools.feaLib import ast
+from fontTools.feaLib.parser import Parser
 from mojo.tools import CallbackWrapper
 from mojo.extensions import registerExtensionDefaults, getExtensionDefault, setExtensionDefault
 from mojo.UI import Message
@@ -157,6 +160,11 @@ class Suffixer:
 					newName = gname + "." + suffixes[1]
 					renameDict[gname] = newName
 
+			# change names in feature code first
+			if self.w.inFeatureCode.get():
+				self._changeInFeatureCode(self.f, renameDict)
+
+			# then rename the glyphs themselves
 			for oldName, newName in renameDict.items():
 				self._changeGlyphname(oldName, newName)
 
@@ -195,6 +203,30 @@ class Suffixer:
 		self.f.renameGlyph(gname, newName, renameComponents=True, renameGroups=True, renameKerning=True)
 		self.f[newName].autoUnicodes()
 		self.f[newName].performUndo()
-			
-		
+
+
+	def _changeInFeatureCode(self, font, renameDict):
+		""" Replace changed glyph names in feature file. """
+		if font.path is None:
+			return
+
+		fea_path = os.path.join(font.path, 'features.fea')
+		fea_ast = Parser(fea_path,font.glyphOrder).parse()
+
+		### these next 2 blocks slightly alter extisting behavior
+		### within feaLib to change glyph names when calling asFea
+		oldFea = ast.asFea
+		def newFea(g):
+			# get new name from dict, otherwise return gname.
+			return oldFea(renameDict.get(g, g))
+		ast.asFea = newFea
+
+		def glyphNameAsFea(self, indent=""):
+			name = str(self.glyph)
+			return renameDict.get(name, name)
+		ast.GlyphName.asFea = glyphNameAsFea
+
+		font.features.text = fea_ast.asFea()
+
+
 Suffixer()
