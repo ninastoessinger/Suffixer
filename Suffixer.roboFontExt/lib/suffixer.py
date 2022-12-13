@@ -5,7 +5,10 @@ v1.2 / Nina Stoessinger / February 2020
 With thanks to Frederik Berlaen, David Jonathan Ross, Ryan Bugden
 """
 
+import os
 from AppKit import NSApp, NSMenuItem, NSAlternateKeyMask, NSCommandKeyMask
+from fontTools.feaLib import ast
+from fontTools.feaLib.parser import Parser
 from mojo.tools import CallbackWrapper
 from mojo.extensions import registerExtensionDefaults, getExtensionDefault, setExtensionDefault
 from mojo.UI import Message
@@ -59,16 +62,16 @@ class Suffixer:
 		currentSuffix = ""
 		if CurrentGlyph() is not None:
 			currentSuffix = self._findSuffix(CurrentGlyph().name)
-		elif self.f.selection is not None:
-			for gn in self.f.selection:
+		elif self.f.selectedGlyphNames is not None:
+			for gn in self.f.selectedGlyphNames:
 				currentSuffix = self._findSuffix(gn)
 				if currentSuffix != None:
 					break
 		
-		self.w = FloatingWindow((300, 166), "Suffixer")
+		self.w = FloatingWindow((300, 200), "Suffixer")
 		p = 10
 		h = 20
-		y1, y2, y3, y4 = 15, 49, 82, 135
+		y1, y2, y3, y4, y5 = 15, 49, 82, 135, 169
 		w1, x2 = 160, 180
 		
 		self.w.labelTwo = TextBox((p, y1, w1, h), "Add suffix to glyph names:")
@@ -85,11 +88,15 @@ class Suffixer:
 		self.w.scope = RadioGroup((p, y3, -p, h*2), ["Target selected glyphs", "Replace all in current font"], isVertical=True)
 		self.w.scope.set(0)
 
+		self.w.inFeatureCode = CheckBox((p+2, y4, -p, h), "Change glyph names in feature code")
+		self.w.inFeatureCode.set(0)
+
 		currentState = 0 if currentSuffix == "" or currentSuffix == None else 1
 		self.w.replace.set(currentState)
 		self.w.scope.enable(currentState)
+		self.w.inFeatureCode.enable(currentState)
 			
-		self.w.submit = Button((p, y4, -p, h), "Change suffixes", callback=self.replaceSuffixes)
+		self.w.submit = Button((p, y5, -p, h), "Change suffixes", callback=self.replaceSuffixes)
 		self.w.setDefaultButton(self.w.submit)
 		self.w.open()
 		self.w.makeKey()
@@ -100,8 +107,11 @@ class Suffixer:
 		if self.w.replace.get() == False:
 			self.w.scope.set(0)
 			self.w.scope.enable(0)
+			self.w.inFeatureCode.set(0)
+			self.w.inFeatureCode.enable(0)
 		else:
 			self.w.scope.enable(1)
+			self.w.inFeatureCode.enable(1)
 		
 	
 	def _findSuffix(self, gname):
@@ -135,6 +145,8 @@ class Suffixer:
 		else:
 			scope = self.f.keys() if self.w.scope.get() == 1 else self.f.selectedGlyphNames
 
+			renameDict = dict() # collect all name changes in one dict
+
 			if mode == "replace":
 				for gname in scope:
 					if gname.endswith(suffixes[0]):
@@ -144,13 +156,21 @@ class Suffixer:
 						else:
 							sufLenWithPeriod = sufLen+1
 							newName = gname[:-sufLenWithPeriod]
-						self._changeGlyphname(gname, newName)
+						renameDict[gname] = newName
 							
 			elif mode == "append":
 				for gname in scope:
 					newName = gname + "." + suffixes[1]
-					self._changeGlyphname(gname, newName)
-					
+					renameDict[gname] = newName
+
+			# change names in feature code first
+			if self.w.inFeatureCode.get():
+				self._changeInFeatureCode(self.f, renameDict)
+
+			# then rename the glyphs themselves
+			for oldName, newName in renameDict.items():
+				self._changeGlyphname(oldName, newName)
+
 			self.f.changed()
 			
 			# store new values as defaults
@@ -186,6 +206,34 @@ class Suffixer:
 		self.f.renameGlyph(gname, newName, renameComponents=True, renameGroups=True, renameKerning=True)
 		self.f[newName].autoUnicodes()
 		self.f[newName].performUndo()
-			
-		
+
+
+	def _changeInFeatureCode(self, font, renameDict):
+		""" Replace changed glyph names in feature file. """
+		if font.path is None:
+			return
+
+		fea_path = os.path.join(font.path, 'features.fea')
+		try: # fail more gracefully when files mentioned in includes are not found
+			fea_ast = Parser(fea_path,font.glyphOrder).parse()
+		except Exception as e:
+			print(e)
+			return
+
+		### these next 2 blocks slightly alter extisting behavior
+		### within feaLib to change glyph names when calling asFea
+		oldFea = ast.asFea
+		def newFea(g):
+			# get new name from dict, otherwise return gname.
+			return oldFea(renameDict.get(g, g))
+		ast.asFea = newFea
+
+		def glyphNameAsFea(self, indent=""):
+			name = str(self.glyph)
+			return renameDict.get(name, name)
+		ast.GlyphName.asFea = glyphNameAsFea
+
+		font.features.text = fea_ast.asFea()
+
+
 Suffixer()
