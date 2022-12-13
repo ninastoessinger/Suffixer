@@ -214,7 +214,11 @@ class Suffixer:
 			return
 
 		fea_path = os.path.join(font.path, 'features.fea')
-		fea_ast = Parser(fea_path,font.glyphOrder).parse()
+		try: # fail more gracefully when files mentioned in includes are not found
+			fea_ast = Parser(fea_path,font.glyphOrder).parse()
+		except Exception as e:
+			print(e)
+			return
 
 		### these next 2 blocks slightly alter extisting behavior
 		### within feaLib to change glyph names when calling asFea
