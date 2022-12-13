@@ -71,7 +71,7 @@ class Suffixer:
 		self.w = FloatingWindow((300, 200), "Suffixer")
 		p = 10
 		h = 20
-		y1, y2, y3, y4 = 15, 49, 82, 135, 169
+		y1, y2, y3, y4, y5 = 15, 49, 82, 135, 169
 		w1, x2 = 160, 180
 		
 		self.w.labelTwo = TextBox((p, y1, w1, h), "Add suffix to glyph names:")
