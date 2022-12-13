@@ -65,10 +65,10 @@ class Suffixer:
 				if currentSuffix != None:
 					break
 		
-		self.w = FloatingWindow((300, 166), "Suffixer")
+		self.w = FloatingWindow((300, 200), "Suffixer")
 		p = 10
 		h = 20
-		y1, y2, y3, y4 = 15, 49, 82, 135
+		y1, y2, y3, y4 = 15, 49, 82, 135, 169
 		w1, x2 = 160, 180
 		
 		self.w.labelTwo = TextBox((p, y1, w1, h), "Add suffix to glyph names:")
@@ -85,11 +85,15 @@ class Suffixer:
 		self.w.scope = RadioGroup((p, y3, -p, h*2), ["Target selected glyphs", "Replace all in current font"], isVertical=True)
 		self.w.scope.set(0)
 
+		self.w.inFeatureCode = CheckBox((p+2, y4, -p, h), "Change glyph names in feature code")
+		self.w.inFeatureCode.set(0)
+
 		currentState = 0 if currentSuffix == "" or currentSuffix == None else 1
 		self.w.replace.set(currentState)
 		self.w.scope.enable(currentState)
+		self.w.inFeatureCode.enable(currentState)
 			
-		self.w.submit = Button((p, y4, -p, h), "Change suffixes", callback=self.replaceSuffixes)
+		self.w.submit = Button((p, y5, -p, h), "Change suffixes", callback=self.replaceSuffixes)
 		self.w.setDefaultButton(self.w.submit)
 		self.w.open()
 		self.w.makeKey()
