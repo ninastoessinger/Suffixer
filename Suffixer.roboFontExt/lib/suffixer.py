@@ -59,8 +59,8 @@ class Suffixer:
 		currentSuffix = ""
 		if CurrentGlyph() is not None:
 			currentSuffix = self._findSuffix(CurrentGlyph().name)
-		elif self.f.selection is not None:
-			for gn in self.f.selection:
+		elif self.f.selectedGlyphNames is not None:
+			for gn in self.f.selectedGlyphNames:
 				currentSuffix = self._findSuffix(gn)
 				if currentSuffix != None:
 					break
