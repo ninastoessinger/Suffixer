@@ -139,6 +139,8 @@ class Suffixer:
 		else:
 			scope = self.f.keys() if self.w.scope.get() == 1 else self.f.selectedGlyphNames
 
+			renameDict = dict() # collect all name changes in one dict
+
 			if mode == "replace":
 				for gname in scope:
 					if gname.endswith(suffixes[0]):
@@ -148,13 +150,16 @@ class Suffixer:
 						else:
 							sufLenWithPeriod = sufLen+1
 							newName = gname[:-sufLenWithPeriod]
-						self._changeGlyphname(gname, newName)
+						renameDict[gname] = newName
 							
 			elif mode == "append":
 				for gname in scope:
 					newName = gname + "." + suffixes[1]
-					self._changeGlyphname(gname, newName)
-					
+					renameDict[gname] = newName
+
+			for oldName, newName in renameDict.items():
+				self._changeGlyphname(oldName, newName)
+
 			self.f.changed()
 			
 			# store new values as defaults
