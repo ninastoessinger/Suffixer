@@ -107,8 +107,11 @@ class Suffixer:
 		if self.w.replace.get() == False:
 			self.w.scope.set(0)
 			self.w.scope.enable(0)
+			self.w.inFeatureCode.set(0)
+			self.w.inFeatureCode.enable(0)
 		else:
 			self.w.scope.enable(1)
+			self.w.inFeatureCode.enable(1)
 		
 	
 	def _findSuffix(self, gname):
